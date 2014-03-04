@@ -1,0 +1,13 @@
+{application, paris, [
+  {description, ""},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+    kernel,
+    stdlib,
+    crypto,
+    lager,
+    cowboy
+  ]},
+  {env, []}
+]}.
