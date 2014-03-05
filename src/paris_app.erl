@@ -24,6 +24,9 @@ start(_StartType, [AppName]) ->
   TransOpts   = [{port, Port}, {ip, IP}],
   ProtoOpts   = [{env, [{dispatch, Dispatch}]}],
   {ok, _}     = cowboy:start_http(http, MaxConn, TransOpts, ProtoOpts),
+  lager:info("Run mode : ~s", [os:getenv("PARIS_RUN_MODE")]),
+  Mode = list_to_atom("paris_" ++ os:getenv("PARIS_RUN_MODE")),
+  Mode:start(),
   lager:info("Paris server started on port ~p (~p)", [Port, code:priv_dir(AppName)]),
   paris_sup:start_link([{app, AppName}, {port, Port}, {ip, IP}, {max_conn, MaxConn}]).
 
