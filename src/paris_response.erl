@@ -5,8 +5,14 @@
   render_view/2,
   render_view/3,
   render_text/1,
-  render_text/2
+  render_text/2,
+  redirect/1
 ]).
+
+redirect(Path) when is_list(Path) ->
+  redirect(list_to_binary(Path));
+redirect(Path) when is_binary(Path) ->
+  {302, [{<<"Location">>, Path}], []}.
 
 render_text(Data) when is_list(Data) ->
   render_text(list_to_binary(Data), []);
