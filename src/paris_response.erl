@@ -6,7 +6,14 @@
   render_view/3,
   render_text/1,
   render_text/2,
-  redirect/1
+  redirect/1,
+  ws_terminate/0,
+  ws_ok/2,
+  ws_ok/3,
+  ws_hibernate/2,
+  ws_hibernate/3,
+  ws_shutdown/2,
+  ws_text/3
 ]).
 
 redirect(Path) when is_list(Path) ->
@@ -37,3 +44,11 @@ render_view(View, Variables, Headers) when is_atom(View), is_list(Variables), is
       end;
     _ -> {500, [], []}
   end.
+
+ws_terminate() -> ok.
+ws_ok(Req, State) -> {ok, Req, State}.
+ws_ok(Req, State, Timeout) -> {ok, Req, State, Timeout}.
+ws_hibernate(Req, State) -> {ok, Req, State, hibernate}.
+ws_hibernate(Req, State, Timeout) -> {ok, Req, State, Timeout, hibernate}.
+ws_shutdown(Req, _) -> {shutdown, Req}.
+ws_text(Req, State, Msg) -> {reply, {text, Msg}, Req, State}.

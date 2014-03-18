@@ -9,18 +9,18 @@
   terminate/3
 ]).
 
-init(_, Req, _) ->
+init(_TransportName, Req, State) ->
   gproc:reg({p, l, my_room}),
-  {ok, Req, undefined_state}.
+  paris_response:ws_ok(Req, State).
 
 handle({text, Msg}, Req, State) ->
   gproc:send({p, l, my_room}, Msg),
-  {ok, Req, State};
+  paris_response:ws_ok(Req, State);
 handle(_, Req, State) ->
-  {ok, Req, State}.
+  paris_response:ws_ok(Req, State).
 
 info(Msg, Req, State) ->
-  {reply, {text, Msg}, Req, State}.
+  paris_response:ws_text(Req, State, Msg).
 
 terminate(_, _, _) ->
-  ok.
+  paris_response:ws_terminate().
