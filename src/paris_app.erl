@@ -27,7 +27,7 @@ start(_StartType, [AppName]) ->
   lager:info("Run mode : ~s", [os:getenv("PARIS_RUN_MODE")]),
   Mode = list_to_atom("paris_" ++ os:getenv("PARIS_RUN_MODE")),
   Mode:start(),
-  lager:info("Paris server started on port ~p", [Port]),
+  lager:info("~p server started on port ~p", [AppName, Port]),
   paris_sup:start_link([{app, AppName}, {port, Port}, {ip, IP}, {max_conn, MaxConn}]).
 
 stop(_State) ->

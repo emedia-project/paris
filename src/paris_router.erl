@@ -23,8 +23,12 @@ routes(App) ->
   CustomRoutes = case application:get_env(App, routes) of
     {ok, Routes} -> 
       lists:map(fun({Path, Module}) ->
-            {Path, ?MODULE, [Module]}
-        end, Routes);
+            [T|_] = lists:reverse(Path),
+            if 
+              T =:= $/ -> {Path ++ "[...]", ?MODULE, [Module]};
+              true -> {Path ++ "/[...]", ?MODULE, [Module]}
+            end
+        end, lists:reverse(lists:sort(Routes)));
     _ -> 
       []
   end,
