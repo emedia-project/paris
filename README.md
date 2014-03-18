@@ -52,6 +52,8 @@ The startup script (`my_project`) in the example above has the following options
 
 ## Documentation
 
+Modules:
+
 | Module | Description |
 | -- | -- |
 | [paris_response](_doc/paris_response.md) | Response helpers |
