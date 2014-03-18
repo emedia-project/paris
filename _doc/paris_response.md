@@ -35,3 +35,16 @@ Render text `Data`. Add `Headers` to the response.
 ## `render_text(Data)`
 
 Equivalent to `render_text(Data, [])`
+
+## `ws_ok(Req, State)`
+## `ws_ok(Req, State, Timeout)`
+## `ws_hibernate(Req, State)`
+## `ws_hibernate(Req, State, Timeout)`
+## `ws_shutdown(Req, State)`
+## `ws_text(Req, State, Msg)`
+## `ws_terminate()`
+## `ws_binary(Req, State, Msg)`
+## `ws_close(Req, State, Msg)`
+## `ws_close(Req, State, Msg, Code)`
+## `ws_ping(Req, State, Msg)`
+## `ws_pong(Req, State, Msg)`

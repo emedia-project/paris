@@ -13,7 +13,12 @@
   ws_hibernate/2,
   ws_hibernate/3,
   ws_shutdown/2,
-  ws_text/3
+  ws_text/3,
+  ws_binary/3,
+  ws_close/3,
+  ws_close/4,
+  ws_ping/3,
+  ws_pong/3
 ]).
 
 redirect(Path) when is_list(Path) ->
@@ -52,3 +57,8 @@ ws_hibernate(Req, State) -> {ok, Req, State, hibernate}.
 ws_hibernate(Req, State, Timeout) -> {ok, Req, State, Timeout, hibernate}.
 ws_shutdown(Req, _) -> {shutdown, Req}.
 ws_text(Req, State, Msg) -> {reply, {text, Msg}, Req, State}.
+ws_binary(Req, State, Msg) -> {reply, {binary, Msg}, Req, State}.
+ws_close(Req, State, Msg) -> {reply, {close, Msg}, Req, State}.
+ws_close(Req, State, Msg, Code) -> {reply, {close, Code, Msg}, Req, State}.
+ws_ping(Req, State, Msg) -> {reply, {ping, Msg}, Req, State}.
+ws_pong(Req, State, Msg) -> {reply, {pong, Msg}, Req, State}.
