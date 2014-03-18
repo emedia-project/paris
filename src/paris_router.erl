@@ -1,6 +1,9 @@
 -module(paris_router).
 
 -export([
+  routes/1
+]).
+-export([
   init/3, 
   handle/2, 
   terminate/3
@@ -12,21 +15,38 @@
   websocket_terminate/3
 ]).
 
-init({tcp, http}, Req, _Opts) ->
-  case cowboy_req:header(<<"upgrade">>, Req) of
-    {<<"websocket">>, _Req2} -> {upgrade, protocol, cowboy_websocket};
-    {_, Req3} -> {ok, Req3, undefined_state}
-  end.
+% -------------------------------------
+% Common
+% -------------------------------------
+
+routes(App) ->
+  CustomRoutes = case application:get_env(App, routes) of
+    {ok, Routes} -> 
+      lists:map(fun({Path, Module}) ->
+            {Path, ?MODULE, [Module]}
+        end, Routes);
+    _ -> 
+      []
+  end,
+  [{'_', 
+    CustomRoutes ++ [{'_', ?MODULE, []}]
+  }].
 
 % -------------------------------------
 % REST
 % -------------------------------------
 
+init({tcp, http}, Req, Opts) ->
+  case cowboy_req:header(<<"upgrade">>, Req) of
+    {<<"websocket">>, _Req2} -> {upgrade, protocol, cowboy_websocket};
+    {_, Req3} -> {ok, Req3, Opts}
+  end.
+
 handle(Req, State) ->
   {Method, _} = cowboy_req:method(Req),
   Action = list_to_atom(string:to_lower(binary_to_list(Method))),
-  {Path, Module, Args} = get_module(Req),
-  lager:info("~s ~s", [Method, Path]),
+  {Path, Module, Args} = get_module(Req, State),
+  lager:info("~s ~s (~p :: ~p)", [Method, Path, Module, Args]),
   {Code, Header, Body} = case code:ensure_loaded(Module) of
     {module, Module} ->
       case erlang:function_exported(Module, Action, 1+length(Args)) of
@@ -52,22 +72,22 @@ terminate(_Req, _State, _) ->
 % -------------------------------------
 
 websocket_init(TransportName, Req, Opts) ->
-  {Path, Module, _Args} = get_module(Req),
+  {Path, Module, _Args} = get_module(Req, Opts),
   lager:debug("WS::init ~s", [Path]),
   erlang:apply(Module, init, [TransportName, Req, Opts]).
 
 websocket_handle(Msg, Req, State) ->
-  {Path, Module, _Args} = get_module(Req),
+  {Path, Module, _Args} = get_module(Req, State),
   lager:debug("WS::handle ~s", [Path]),
   erlang:apply(Module, handle, [Msg, Req, State]).
 
 websocket_info(Info, Req, State) ->
-  {Path, Module, _Args} = get_module(Req),
+  {Path, Module, _Args} = get_module(Req, State),
   lager:debug("WS::info ~s", [Path]),
   erlang:apply(Module, info, [Info, Req, State]).
 
 websocket_terminate(Reason, Req, State) ->
-  {Path, Module, _Args} = get_module(Req),
+  {Path, Module, _Args} = get_module(Req, State),
   lager:debug("WS::terminate ~s", [Path]),
   erlang:apply(Module, terminate, [Reason, Req, State]).
 
@@ -75,11 +95,22 @@ websocket_terminate(Reason, Req, State) ->
 % Private
 % -------------------------------------
 
-get_module(Req) ->
+get_module(Req, State) ->
   {Path, _} = cowboy_req:path(Req),
-  {Module, Args} = case string:tokens(binary_to_list(Path), "/") of
-    [M|P] -> {list_to_atom(M), P};
-    [] -> {index, []}
+  {Module, Args} = case State of
+    [M] -> 
+      Args1 = case cowboy_req:path_info(Req) of
+        {PathInfo, _} when is_list(PathInfo) ->
+          [binary_to_list(E) || E <- PathInfo];
+        _ -> 
+          []
+      end,
+      {M, Args1};
+    [] ->
+      case string:tokens(binary_to_list(Path), "/") of
+        [M|P] -> {list_to_atom(M), P};
+        [] -> {index, []}
+      end
   end,
   {Path, Module, Args}.
 
