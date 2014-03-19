@@ -6,6 +6,8 @@
   render_view/3,
   render_text/1,
   render_text/2,
+  render_stream/1,
+  render_stream/2,
   redirect/1,
   ws_terminate/0,
   ws_ok/2,
@@ -49,6 +51,20 @@ render_view(View, Variables, Headers) when is_atom(View), is_list(Variables), is
       end;
     _ -> {500, [], []}
   end.
+
+render_stream(Path) ->
+  render_stream(Path, []).
+render_stream(Path, Headers) ->
+  Size = filelib:file_size(Path),
+  Sendfile = fun (Socket, Transport) ->
+      case Transport:sendfile(Socket, Path) of
+        {ok, _} -> ok;
+        {error, closed} -> ok;
+        {error, etimedout} -> ok
+      end
+  end,
+  {stream, Headers, {Size, Sendfile}}.
+  %{{stream, Size, Sendfile}, Req, State}.
 
 ws_terminate() -> ok.
 ws_ok(Req, State) -> {ok, Req, State}.

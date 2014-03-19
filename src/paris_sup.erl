@@ -23,4 +23,6 @@ start_link(Args) ->
 %% ===================================================================
 
 init(Args) ->
-  {ok, {{one_for_one, 5, 10}, [?CHILD(paris, worker, Args)]} }.
+  {ok, {{one_for_one, 5, 10}, [
+        ?CHILD(paris, worker, Args)
+      ]}}.
