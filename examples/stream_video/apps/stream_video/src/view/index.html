@@ -2,13 +2,24 @@
 <html lang="en">
   <head>
     <title>stream_video: Welcome aboard</title>
+    <link href="/css/video-js.css" rel="stylesheet" type="text/css">
+    <style>
+      .center { margin: 0 auto; }
+    </style>
+    <script src="/js/video.js"></script>
+    <script>
+      videojs.options.flash.swf = "/js/video-js.swf";
+    </script>
   </head>
   <body>
-    <video width="400" height="222" controls="controls">
-      <source src="/video/mp4" type="video/mp4" />
-      <source src="/video/webm" type="video/webm" />
-      <source src="/video/ogg" type="video/ogg" />
-      Your browser does not support HTML5 !!!
-    </video>
+    Video example using <a href="http://www.videojs.com/">video.js</a>.
+    <div style="align: center;">
+      <video id="paris_video" class="video-js vjs-default-skin center" controls preload="none" width="640" height="360" poster="/img/clip.png" data-setup="{}">
+        <source src="/video/mp4" type="video/mp4" />
+        <source src="/video/webm" type="video/webm" />
+        <source src="/video/ogg" type="video/ogg" />
+        Your browser does not support HTML5 !!!
+      </video>
+    </div>
   </body>
 </html>
