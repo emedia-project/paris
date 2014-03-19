@@ -56,6 +56,11 @@ render_stream(Path) ->
   render_stream(Path, []).
 render_stream(Path, Headers) ->
   Size = filelib:file_size(Path),
+  Mime = paris_utils:mime(Path),
+  Headers1 = Headers ++ [
+    {<<"Content-Type">>, Mime}, 
+    {<<"Accept-Ranges">>, <<"bytes">>}
+  ],
   Sendfile = fun (Socket, Transport) ->
       case Transport:sendfile(Socket, Path) of
         {ok, _} -> ok;
@@ -63,7 +68,7 @@ render_stream(Path, Headers) ->
         {error, etimedout} -> ok
       end
   end,
-  {stream, Headers, {Size, Sendfile}}.
+  {stream, Headers1, {Size, Sendfile}}.
 
 ws_terminate() -> ok.
 ws_ok(Req, State) -> {ok, Req, State}.
