@@ -64,7 +64,6 @@ render_stream(Path, Headers) ->
       end
   end,
   {stream, Headers, {Size, Sendfile}}.
-  %{{stream, Size, Sendfile}, Req, State}.
 
 ws_terminate() -> ok.
 ws_ok(Req, State) -> {ok, Req, State}.

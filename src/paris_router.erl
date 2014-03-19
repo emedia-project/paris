@@ -62,20 +62,18 @@ handle(Req, State) ->
     _ ->
       static(Path)
   end,
-  case Code of
+  {ok, Req4} = case Code of
     stream -> 
-      Req2 = lists:foldl(fun({Name, Value}, Req1) ->
-            cowboy_req:set_resp_header(Name, Value, Req1)
-        end, Req, Header),
       {Size, SendFile} = Body,
-      {{stream, Size, SendFile}, Req2, State};
+      Req2 = cowboy_req:set_resp_body_fun(Size, SendFile, Req),
+      cowboy_req:reply(200, Header, Req2);
     N when is_number(N) ->
-      {ok, Reply} = if
+      if
         Code > 400 -> cowboy_req:reply(Code, Header, error_body(Code, Action, Path, Module), Req);
         true -> cowboy_req:reply(Code, Header, Body, Req)
-      end,
-      {ok, Reply, State}
-  end.
+      end
+  end,
+  {ok, Req4, State}.
 
 
 terminate(_Req, _State, _) ->
