@@ -146,14 +146,19 @@ static(Path) ->
   case lists:any(fun(E) -> E =:= ".." end, Args) of
     true -> {404, [], []};
     false ->
-      case paris:priv_dir() of
-        error -> {500, [], []};
-        PrivDir -> 
-          Static = filename:join([PrivDir, "static"] ++ Args),
+      Static = paris_helpers:static(Args),
+      case filelib:is_dir(Static) of
+        true ->
+          case filelib:is_file(filename:join(Static, "index.html")) of
+            true ->
+              {302, [{<<"Location">>, filename:join(["/"] ++ Args ++ ["index.html"])}], []};
+            false ->
+              {404, [], []}
+          end;
+        _ ->
           case file:read_file(Static) of
             {error, _} -> {404, [], []};
             {ok, Data} -> {200, [{<<"Content-Type">>, paris_utils:mime(Static)}], Data}
           end
       end
   end.
-

@@ -9,6 +9,8 @@
   render_stream/1,
   render_stream/2,
   redirect/1,
+  http_error/1,
+  http_error/2,
   ws_terminate/0,
   ws_ok/2,
   ws_ok/3,
@@ -27,6 +29,9 @@ redirect(Path) when is_list(Path) ->
   redirect(list_to_binary(Path));
 redirect(Path) when is_binary(Path) ->
   {302, [{<<"Location">>, Path}], []}.
+
+http_error(Code) -> http_error(Code, []).
+http_error(Code, Headers) -> {Code, Headers, []}.
 
 render_text(Data) when is_list(Data) ->
   render_text(list_to_binary(Data), []);
