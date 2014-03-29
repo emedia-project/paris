@@ -146,7 +146,7 @@ static(Path) ->
   case lists:any(fun(E) -> E =:= ".." end, Args) of
     true -> {404, [], []};
     false ->
-      Static = paris_helpers:static(Args),
+      Static = paris:static(Args),
       case filelib:is_dir(Static) of
         true ->
           case filelib:is_file(filename:join(Static, "index.html")) of

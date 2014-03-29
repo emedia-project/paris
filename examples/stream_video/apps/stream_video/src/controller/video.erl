@@ -5,5 +5,5 @@
   ]).
 
 get(_Request, Format) ->
-  File = paris_helpers:static("videos/demo." ++ Format),
+  File = paris:static("videos/demo." ++ Format),
   paris_response:render_stream(File).
