@@ -6,6 +6,8 @@
   render_view/3,
   render_text/1,
   render_text/2,
+  render_json/1,
+  render_json/2,
   render_stream/1,
   render_stream/2,
   redirect/1,
@@ -18,6 +20,7 @@
   ws_hibernate/3,
   ws_shutdown/2,
   ws_text/3,
+  ws_json/3,
   ws_binary/3,
   ws_close/3,
   ws_close/4,
@@ -41,6 +44,11 @@ render_text(Data, Headers) when is_list(Data), is_list(Headers) ->
   render_text(list_to_binary(Data), Headers);
 render_text(Data, Headers) when is_binary(Data), is_list(Headers) ->
   {200, Headers ++ [{<<"Content-Type">>, <<"text/plain">>}], Data}. 
+
+render_json(Data) ->
+  render_json(Data, []).
+render_json(Data, Headers) ->
+  {200, Headers ++ [{<<"Content-Type">>, <<"application/json">>}], jsx:encode(Data)}.
 
 render_view(View) ->
   render_view(View, [], []).
@@ -82,6 +90,7 @@ ws_hibernate(Req, State) -> {ok, Req, State, hibernate}.
 ws_hibernate(Req, State, Timeout) -> {ok, Req, State, Timeout, hibernate}.
 ws_shutdown(Req, _) -> {shutdown, Req}.
 ws_text(Req, State, Msg) -> {reply, {text, Msg}, Req, State}.
+ws_json(Req, State, Msg) -> {reply, {text, jsx:encode(Msg)}, Req, State}.
 ws_binary(Req, State, Msg) -> {reply, {binary, Msg}, Req, State}.
 ws_close(Req, State, Msg) -> {reply, {close, Msg}, Req, State}.
 ws_close(Req, State, Msg, Code) -> {reply, {close, Code, Msg}, Req, State}.
