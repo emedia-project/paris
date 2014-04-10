@@ -1,11 +1,18 @@
 -module(paris_request).
 
 -export([
+  body/1,
   content_type/1,
   content_type/2,
   accept/1,
   accept/2
 ]).
+
+body(Req) ->
+  case cowboy_req:body(Req) of
+    {ok, Data, _Req2} -> {ok, Data};
+    E -> E
+  end.
 
 content_type(Req) ->
   case cowboy_req:parse_header(<<"content-type">>, Req) of

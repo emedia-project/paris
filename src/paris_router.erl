@@ -57,7 +57,12 @@ handle(Req, State) ->
         true -> 
           erlang:apply(Module, Action, [Req] ++ Args);
         false -> 
-          {404, [], []}
+          case erlang:function_exported(Module, all, 1+length(Args)) of
+            true -> 
+              erlang:apply(Module, all, [Req] ++ Args);
+            false ->
+              {404, [], []}
+          end
       end;
     _ ->
       static(Path)
