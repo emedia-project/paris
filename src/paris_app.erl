@@ -7,27 +7,31 @@
 start(_StartType, [AppName]) ->
   Port = case application:get_env(AppName, port) of
     {ok, P} -> P;
-    _ -> 
+    _ ->
       case application:get_env(AppName, port_from) of
-        {Module, Function, Args} -> erlang:apply(Module, Function, Args);
-        _ -> 8080
+        {ok, {Module, Function, Args}} ->
+          erlang:apply(Module, Function, Args);
+        _ ->
+          8080
       end
   end,
-  IP = case application:get_env(AppName, ip) of
-    {ok, I} ->
-      [A, B, C, D] = [list_to_integer(X) || X <- string:tokens(I, ".")],
-      {A, B, C, D};
-    _ -> 
+  StrIP = case application:get_env(AppName, ip) of
+    {ok, I} -> I;
+    _ ->
       case application:get_env(AppName, ip_from) of
-        {Module1, Function1, Args1} -> erlang:apply(Module1, Function1, Args1);
-        _ -> {0, 0, 0, 0}
+        {ok, {Module1, Function1, Args1}} ->
+          erlang:apply(Module1, Function1, Args1);
+        _ -> "0.0.0.0"
       end
   end,
+  [A, B, C, D] = [list_to_integer(X) || X <- string:tokens(StrIP, ".")],
+  IP = {A, B, C, D},
   MaxConn = case application:get_env(AppName, max_conn) of
     {ok, MC} -> MC;
-    _ -> 
+    _ ->
       case application:get_env(AppName, max_conn_from) of
-        {Module2, Function2, Args2} -> erlang:apply(Module2, Function2, Args2);
+        {Module2, Function2, Args2} ->
+          erlang:apply(Module2, Function2, Args2);
         _ -> 100
       end
   end,
