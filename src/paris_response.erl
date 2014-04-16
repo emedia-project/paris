@@ -10,6 +10,8 @@
   render_json/2,
   render_stream/1,
   render_stream/2,
+  render_stream/3,
+  render_stream/4,
   redirect/1,
   http_error/1,
   http_error/2,
@@ -66,16 +68,22 @@ render_view(View, Variables, Headers) when is_atom(View), is_list(Variables), is
   end.
 
 render_stream(Path) ->
-  render_stream(Path, []).
-render_stream(Path, Headers) ->
-  Size = filelib:file_size(Path),
+  render_stream(Path, 0, filelib:file_size(Path), []).
+render_stream(Path, Offset) when is_integer(Offset) ->
+  render_stream(Path, Offset, filelib:file_size(Path) - Offset, []);
+render_stream(Path, Headers) when is_list(Headers) ->
+  render_stream(Path, 0, filelib:file_size(Path), Headers).
+render_stream(Path, Offset, Size) when is_integer(Size) ->
+  render_stream(Path, Offset, Size, []);
+render_stream(Path, Offset, Headers) when is_list(Headers) ->
+  render_stream(Path, Offset, filelib:file_size(Path) - Offset, Headers).
+render_stream(Path, Offset, Size, Headers) ->
   Mime = paris_utils:mime(Path),
   Headers1 = Headers ++ [
-    {<<"Content-Type">>, Mime}, 
-    {<<"Accept-Ranges">>, <<"bytes">>}
+    {<<"Content-Type">>, Mime} 
   ],
   Sendfile = fun (Socket, Transport) ->
-      case Transport:sendfile(Socket, Path) of
+      case Transport:sendfile(Socket, Path, Offset, Size) of
         {ok, _} -> ok;
         {error, closed} -> ok;
         {error, etimedout} -> ok

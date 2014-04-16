@@ -6,4 +6,4 @@
 
 get(_Request, Format) ->
   File = paris:static("videos/demo." ++ Format),
-  paris_response:render_stream(File).
+  paris_response:render_stream(File, [{<<"Accept-Ranges">>, <<"bytes">>}]).

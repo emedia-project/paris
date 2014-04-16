@@ -5,7 +5,8 @@
   content_type/1,
   content_type/2,
   accept/1,
-  accept/2
+  accept/2,
+  range/1
 ]).
 
 body(Req) ->
@@ -42,3 +43,8 @@ accept(Req, Accept) ->
         (SubType =:= SubType2 orelse <<"*">> =:= SubType2)
     end, accept(Req)).
 
+range(Req) ->
+  {Range, _} = cowboy_req:header(<<"range">>, Req, <<"bytes=0-">>),
+  [_, Range1|_] = string:tokens(binary_to_list(Range), "="),
+  list_to_tuple([trunc(list_to_integer(X)/1024) || 
+      X <- string:tokens(Range1, "-")]).
