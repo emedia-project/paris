@@ -13,7 +13,7 @@ Paris is a MVC framework
 1. First install [rebar](https://github.com/rebar/rebar) on you `PATH`
 2. Install [paris-templates](https://github.com/emedia-project/paris-templates) :
 
-        \curl https://raw.github.com/emedia-project/paris-templates/master/install.sh | sh
+        \curl https://raw.githubusercontent.com/emedia-project/paris-templates/master/install.sh | sh
 
 3. Create a new paris' project using rebar :
 
