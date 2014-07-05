@@ -58,7 +58,7 @@ Here is the tree of generated files :
 
 * Controllers are in `apps/my_project/src/controller`.
 * Views are in `apps/my_project/src/view`.
-* Models are in `apps/my_project/src/model` (There is no ORM in **paris**, yet).
+* Models are in `apps/my_project/src/model`.
 * Static files are placed in `apps/my_project/priv/static`.
 * `apps/my_project/src/my_project.app.src` is the OTP application file.
 * `apps/my_project/src/my_project.erl` is the start file. If you need to use other applications, start them from this file.
@@ -116,7 +116,7 @@ You can use the following parameters :
 
 ### Model
 
-There is no ORM in **paris**, yet. If you need one, you could help us and propose something ;)
+To create models, we have a separate ORM : [texas](https://github.com/emedia-project/texas).
 
 ### View
 
