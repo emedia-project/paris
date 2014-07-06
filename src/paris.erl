@@ -5,7 +5,10 @@
 -export([
   priv_dir/0,
   static/1,
-  port/0
+  port/0,
+  set/2,
+  get/1,
+  del/1
 ]).
 -export([start_link/1]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -23,10 +26,19 @@ static(File) when is_list(File) ->
 port() ->
   gen_server:call(?SERVER, {port}).
 
+set(Name, Value) -> 
+  gen_server:call(?SERVER, {set, Name, Value}).
+
+get(Name) ->
+  gen_server:call(?SERVER, {get, Name}).
+
+del(Name) ->
+  gen_server:call(?SERVER, {del, Name}).
+
 start_link(Args) ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, Args, []).
 init(Args) ->
-  {ok, Args}.
+  {ok, Args ++ [{user, []}]}.
 
 handle_call({priv_dir}, _From, State) ->
   PrivDir = case lists:keyfind(app, 1, State) of
@@ -40,6 +52,34 @@ handle_call({port}, _From, State) ->
     {port, P} -> P
   end,
   {reply, Port, State};
+handle_call({set, Name, Value}, _From, State) ->
+  {Result, State1} = case lists:keyfind(user, 1, State) of
+    false -> {error, State};
+    {user, UserData} ->
+      UserData1 = elists:merge_keylists(1, [{Name, Value}], UserData),
+      State2 = elists:merge_keylists(1, [{user, UserData1}], State),
+      {ok, State2}
+  end,
+  {reply, Result, State1};
+handle_call({get, Name}, _From, State) ->
+  Value = case lists:keyfind(user, 1, State) of
+    false -> undefined;
+    {user, UserData} ->
+      case lists:keyfind(Name, 1, UserData) of
+        false -> undefined;
+        {Name, Value1} -> Value1
+      end
+  end,
+  {reply, Value, State};
+handle_call({del, Name}, _From, State) ->
+  {Result, State1} = case lists:keyfind(user, 1, State) of
+    false -> {error, State};
+    {user, UserData} ->
+      UserData1 = lists:keydelete(Name, 1, UserData),
+      State2 = elists:merge_keylists(1, [{user, UserData1}], State),
+      {ok, State2}
+  end,
+  {reply, Result, State1};
 handle_call(_Request, _From, State) ->
   {reply, ok, State}.
 

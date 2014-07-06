@@ -6,8 +6,42 @@
   content_type/2,
   accept/1,
   accept/2,
-  range/1
+  range/1,
+  param/3,
+  param/2,
+  params/2,
+  params/1
 ]).
+
+param(Req, Type, Name) ->
+  case lists:keyfind(Name, 1, params(Req, Type)) of
+    {Name, Value} -> Value;
+    _ -> undefined
+  end.
+
+param(Req, Name) ->
+  case lists:keyfind(Name, 1, params(Req)) of
+    {Name, Value} -> Value;
+    _ -> undefined
+  end.
+
+params(Req, Type) ->
+  case Type of
+    get -> get_vals(Req);
+    post -> post_vals(Req)
+  end.
+
+params(Req) ->
+  get_vals(Req) ++ post_vals(Req).
+
+post_vals(Req) ->
+  case cowboy_req:body_qs(Req) of
+    {ok, List, _} -> List;
+    _ -> []
+  end.
+get_vals(Req) ->
+  {Params2, _} = cowboy_req:qs_vals(Req),
+  Params2.
 
 body(Req) ->
   case cowboy_req:body(Req) of
