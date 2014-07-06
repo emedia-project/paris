@@ -13,6 +13,7 @@
   render_stream/3,
   render_stream/4,
   redirect/1,
+  redirect/2,
   http_error/1,
   http_error/2,
   ws_terminate/0,
@@ -30,6 +31,8 @@
   ws_pong/3
 ]).
 
+redirect(Format, Data) when is_list(Format), is_list(Data) ->
+  redirect(io_lib:format(Format, Data)).
 redirect(Path) when is_list(Path) ->
   redirect(list_to_binary(Path));
 redirect(Path) when is_binary(Path) ->
