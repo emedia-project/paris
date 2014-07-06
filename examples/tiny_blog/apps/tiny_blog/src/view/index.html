@@ -1,0 +1,10 @@
+{% extends "default.html" %}
+{% block content %}
+{% for post in posts %}
+<div>
+  <h3><a href="/post/{{post.id}}">{{ post.title }}</a></h3>
+  <h4>by {{ post.author }} - {{ post.date }}</h4>
+  <div>{{ post.body }}</div>
+</div>
+{% endfor %}
+{% endblock %}

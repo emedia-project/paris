@@ -1,0 +1,9 @@
+{% extends "default.html" %}
+{% block content %}
+<form method="POST" action="">
+  <input type="text" class="form-control" name="title" placeholder="Title"><br />
+  <input type="text" class="form-control" name="author" placeholder="Author"><br />
+  <textarea class="form-control" rows="10" name="body"></textarea><br />
+  <button type="submit" class="btn btn-primary">Add</button>
+</form>
+{% endblock %}

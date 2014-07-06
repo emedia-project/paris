@@ -1,0 +1,21 @@
+{% extends "default.html" %}
+{% block content %}
+<div>
+  <h3><a href="/post/{{post.id}}">{{ post.title }}</a></h3>
+  <h4>by {{ post.author }} - {{ post.date }}</h4>
+  <div>{{ post.body }}</div>
+  <h4>Comments</h4>
+  {% for comment in comments %}
+  <div>
+    <b>{{comment.date}}, {{comment.author}} say:</b>
+    <p>{{comment.body}}</p>
+  </div>
+  {% endfor %}
+  <h4>New comment</h4>
+  <form method="POST" action="/comment/{{post.id}}">
+    <input type="text" class="form-control" name="author" placeholder="Author"><br />
+    <textarea class="form-control" rows="3" name="body"></textarea><br />
+    <button type="submit" class="btn btn-primary">Add</button>
+  </form>
+</div>
+{% endblock %}
