@@ -30,7 +30,7 @@ start(_StartType, [AppName]) ->
     {ok, MC} -> MC;
     _ ->
       case application:get_env(AppName, max_conn_from) of
-        {Module2, Function2, Args2} ->
+        {ok, {Module2, Function2, Args2}} ->
           erlang:apply(Module2, Function2, Args2);
         _ -> 100
       end

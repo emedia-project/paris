@@ -6,6 +6,8 @@
   priv_dir/0,
   static/1,
   port/0,
+  app/0,
+  plugins/0,
   set/2,
   get/1,
   del/1
@@ -15,7 +17,7 @@
          terminate/2, code_change/3]).
 
 priv_dir() ->
-  gen_server:call(?SERVER, {priv_dir}).
+  gen_server:call(?SERVER, priv_dir).
 
 static(File) when is_list(File) ->
   case is_string(File) of
@@ -24,7 +26,13 @@ static(File) when is_list(File) ->
   end.
 
 port() ->
-  gen_server:call(?SERVER, {port}).
+  gen_server:call(?SERVER, port).
+
+app() ->
+  gen_server:call(?SERVER, app).
+
+plugins() ->
+  gen_server:call(?SERVER, plugins).
 
 set(Name, Value) -> 
   gen_server:call(?SERVER, {set, Name, Value}).
@@ -38,18 +46,38 @@ del(Name) ->
 start_link(Args) ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, Args, []).
 init(Args) ->
-  {ok, Args ++ [{user, []}]}.
+  State = case lists:keyfind(app, 1, Args) of
+    false -> Args;
+    {app, A} -> 
+      case application:get_env(A, plugins) of
+        {ok, Plugins} -> Args ++ [{plugins, Plugins}];
+        _ -> Args ++ [{plugins, []}]
+      end
+  end,
+  {ok, State ++ [{user, []}]}.
 
-handle_call({priv_dir}, _From, State) ->
+handle_call(priv_dir, _From, State) ->
   PrivDir = case lists:keyfind(app, 1, State) of
     false -> error;
     {app, App} -> code:priv_dir(App)
   end,
   {reply, PrivDir, State};
-handle_call({port}, _From, State) ->
+handle_call(port, _From, State) ->
   Port = case lists:keyfind(port, 1, State) of
     false -> error;
     {port, P} -> P
+  end,
+  {reply, Port, State};
+handle_call(app, _From, State) ->
+  Port = case lists:keyfind(app, 1, State) of
+    false -> error;
+    {app, A} -> A
+  end,
+  {reply, Port, State};
+handle_call(plugins, _From, State) ->
+  Port = case lists:keyfind(plugins, 1, State) of
+    false -> error;
+    {plugins, A} -> A
   end,
   {reply, Port, State};
 handle_call({set, Name, Value}, _From, State) ->

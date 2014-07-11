@@ -65,7 +65,10 @@ handle(Req, State) ->
           end
       end;
     _ ->
-      static(Path)
+      case paris_plugin:call(controller, Module, Action, [Req] ++ Args) of
+        undef -> static(Path);
+        R -> R
+      end
   end,
   {ok, Req4} = case Code of
     stream -> 
