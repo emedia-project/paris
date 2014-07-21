@@ -10,7 +10,7 @@ Paris is a MVC framework
 
 > You need to have [git](http://git-scm.com/) and [erlang](http://erlang.org) installed.
 
-1. First download [paris](https://github.com/emedia-project/paris.app/raw/master/paris), make it executable and add it on you `PATH`
+1. First download [paris](https://github.com/emedia-project/paris.app/wiki/paris), make it executable and add it on you `PATH`
 2. Install templates by running 
 
         paris update
