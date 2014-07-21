@@ -10,14 +10,14 @@ Paris is a MVC framework
 
 > You need to have [git](http://git-scm.com/) and [erlang](http://erlang.org) installed.
 
-1. First install [rebar](https://github.com/rebar/rebar) on you `PATH`
-2. Install [paris-templates](https://github.com/emedia-project/paris-templates) :
+1. First download [paris](https://github.com/emedia-project/paris.app/raw/master/paris), make it executable and add it on you `PATH`
+2. Install templates by running 
 
-        \curl https://raw.githubusercontent.com/emedia-project/paris-templates/master/install.sh | sh
+        paris update
 
-3. Create a new paris' project using rebar :
+2. Create a new paris' project using :
 
-        rebar create template=paris name=my_project
+        paris new my_project
 
 4. _Et voilà_ 
 
@@ -36,6 +36,7 @@ Here is the tree of generated files :
 ├── apps/
 │   └── my_project/
 │       ├── priv/
+│       │   ├── ssl/
 │       │   └── static/
 │       │       └── img/
 │       │           └── erlang.png
@@ -47,8 +48,9 @@ Here is the tree of generated files :
 │           │   └── index.html
 │           ├── my_project.app.src
 │           └── my_project.erl
-├── config
-│   └── my_project.config
+├── config/
+│   ├── my_project.config
+│   └── vm.args
 ├── my_project
 ├── README.md
 ├── Makefile
@@ -63,6 +65,7 @@ Here is the tree of generated files :
 * `apps/my_project/src/my_project.app.src` is the OTP application file.
 * `apps/my_project/src/my_project.erl` is the start file. If you need to use other applications, start them from this file.
 * `config/my_project.config` is the configuration file. It is a standard Erlang [config](http://www.erlang.org/doc/man/config.html) file.
+* `config/vm.args` is a file containing additionnal parameters to pass to the Erlang VM.
 * `my_project` is the startup script. 
 
 ### Statup script 
@@ -139,6 +142,7 @@ You can create two types of controllers.
 Paris have the following pluging :
 
 * [paris.rb](https://github.com/emedia-project/paris_rb) : This plugin allow you to create controllers with [Ruby](https://www.ruby-lang.org).
+* [paris.ex](https://github.com/emedia-project/paris_ex) ; This plugin allow you to create controllers with [Elixir](http://elixir-lang.org/).
 
 ## Documentation
 
