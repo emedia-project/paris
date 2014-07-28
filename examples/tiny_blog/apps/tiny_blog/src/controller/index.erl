@@ -9,5 +9,7 @@ get(_Request) ->
   Posts = lists:map(fun(P) ->
           P:to_keylist()
       end, posts:find(DB, all, [])),
-  paris_response:render_view(index, [{posts, Posts}]).
+  paris_response:render(html, [
+      {template, index}, 
+      {data, [{posts, Posts}]}]).
 

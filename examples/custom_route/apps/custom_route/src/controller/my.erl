@@ -9,16 +9,16 @@
 ]).
 
 get(_Request) ->
-  paris_response:render_view(my).
+  paris_response:render(html, [{template, my}]).
 
 post(_Request) ->
-  paris_response:render_view(my).
+  paris_response:render(html, [{template, my}]).
 
 put(_Request) ->
-  paris_response:render_view(my).
+  paris_response:render(html, [{template, my}]).
 
 head(_Request) ->
-  paris_response:render_view(my).
+  paris_response:render(html, [{template, my}]).
 
 delete(_Request) ->
-  paris_response:render_view(my).
+  paris_response:render(html, [{template, my}]).

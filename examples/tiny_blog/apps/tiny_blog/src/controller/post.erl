@@ -7,7 +7,7 @@
 ]).
 
 get(_Request) ->
-  paris_response:render_view(new_post).
+  paris_response:render(html, [{template, new_post}]).
 
 get(_, ID) ->
   DB = paris:get(db),
@@ -15,7 +15,9 @@ get(_, ID) ->
   Comments = lists:map(fun(C) ->
           C:to_keylist()
       end, Post:comments()),
-  paris_response:render_view(view_post, [{post, Post:to_keylist()}, {comments, Comments}]).
+  paris_response:render(html, [
+      {template, view_post}, 
+      {data, [{post, Post:to_keylist()}, {comments, Comments}]}]).
 
 post(Request) ->
   DB = paris:get(db),

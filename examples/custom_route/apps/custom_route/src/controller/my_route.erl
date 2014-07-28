@@ -9,16 +9,16 @@
 ]).
 
 get(_Request) ->
-  paris_response:render_view(my_route).
+  paris_response:render(html, [{template, my_route}]).
 
 post(_Request) ->
-  paris_response:render_view(my_route).
+  paris_response:render(html, [{template, my_route}]).
 
 put(_Request) ->
-  paris_response:render_view(my_route).
+  paris_response:render(html, [{template, my_route}]).
 
 head(_Request) ->
-  paris_response:render_view(my_route).
+  paris_response:render(html, [{template, my_route}]).
 
 delete(_Request) ->
-  paris_response:render_view(my_route).
+  paris_response:render(html, [{template, my_route}]).
