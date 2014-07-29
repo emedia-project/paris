@@ -8,6 +8,7 @@
   port/0,
   app/0,
   plugins/0,
+  mailconf/0,
   set/2,
   get/1,
   del/1
@@ -34,6 +35,9 @@ app() ->
 plugins() ->
   gen_server:call(?SERVER, plugins).
 
+mailconf() ->
+  gen_server:call(?SERVER, mailconf).
+
 set(Name, Value) -> 
   gen_server:call(?SERVER, {set, Name, Value}).
 
@@ -49,9 +53,12 @@ init(Args) ->
   State = case lists:keyfind(app, 1, Args) of
     false -> Args;
     {app, A} -> 
-      case application:get_env(A, plugins) of
-        {ok, Plugins} -> Args ++ [{plugins, Plugins}];
-        _ -> Args ++ [{plugins, []}]
+      Args ++ case application:get_env(A, plugins) of
+        {ok, Plugins} -> [{plugins, Plugins}];
+        _ -> [{plugins, []}]
+      end ++ case application:get_env(A, mail) of
+        {ok, MailConf} -> [{mail, MailConf}];
+        _ -> []
       end
   end,
   {ok, State ++ [{user, []}]}.
@@ -78,6 +85,12 @@ handle_call(plugins, _From, State) ->
   Port = case lists:keyfind(plugins, 1, State) of
     false -> error;
     {plugins, A} -> A
+  end,
+  {reply, Port, State};
+handle_call(mailconf, _From, State) ->
+  Port = case lists:keyfind(mail, 1, State) of
+    false -> error;
+    {mail, A} -> A
   end,
   {reply, Port, State};
 handle_call({set, Name, Value}, _From, State) ->

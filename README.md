@@ -41,10 +41,11 @@ Here is the tree of generated files :
 │       │       └── img/
 │       │           └── erlang.png
 │       └── src/
-│           ├── controller/
+│           ├── controllers/
 │           │   └── index.erl
-│           ├── model/
-│           ├── view/
+│           ├── mailers/
+│           ├── models/
+│           ├── views/
 │           │   └── index.html
 │           ├── my_project.app.src
 │           └── my_project.erl
@@ -58,9 +59,9 @@ Here is the tree of generated files :
 └── rebar.config
 ```
 
-* Controllers are in `apps/my_project/src/controller`.
-* Views are in `apps/my_project/src/view`.
-* Models are in `apps/my_project/src/model`.
+* Controllers are in `apps/my_project/src/controllers`.
+* Views are in `apps/my_project/src/views`.
+* Models are in `apps/my_project/src/models`.
 * Static files are placed in `apps/my_project/priv/static`.
 * `apps/my_project/src/my_project.app.src` is the OTP application file.
 * `apps/my_project/src/my_project.erl` is the start file. If you need to use other applications, start them from this file.
