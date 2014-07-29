@@ -1,4 +1,4 @@
--module(mail).
+-module(paris_mail).
 
 -export([test1/0, test2/0]).
 
