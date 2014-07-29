@@ -135,7 +135,7 @@ get_module(Req, State) ->
   {Path, Module, Args}.
 
 error_body(Code, Action, Path, Module) ->
-  ErrorTmpl = list_to_atom("error_" ++ integer_to_list(Code) ++ "_dtl"),
+  ErrorTmpl = list_to_atom("error_" ++ integer_to_list(Code) ++ "_html"),
   case code:ensure_loaded(ErrorTmpl) of
     {module, ErrorTmpl} ->
       case ErrorTmpl:render([
