@@ -1,16 +1,91 @@
 -module(paris_mail).
 
--export([test1/0, test2/0]).
+-export([send/4]).
 
-% send(
+%% @doc
+%% Send an email
+%%
+%% Options:
+%% <pre>
+%% {cc, string() | binary() | [string()] | [binary()]}
+%% {bcc, string() | binary() | [string()] | [binary()]}
+%% {template, atom(), [{atom(), any()}]}
+%% {body, string() | binary()}
+%% {attachment, [string()] | [binary()]}
+%% {callback, function()}
+%% </pre>
+%%
+%% Example:
+%% <pre>
+%% send(
+%%   "greg@example.com", 
+%%   ["bob@example.com", "john@example.com"]
+%%   "This is a mail",
+%%   [{cc, ["tania@example.com", "tom@example.com"]},
+%%    {bcc, "jane@example.com"},
+%%    {template, my_template, Data},
+%%    {attachments, ["/home/greg/photo.png"]}
+%%    {callback, Fun module:function/1}]).
+%% </pre>
+%% @end
+-spec send(string() | binary(), string() | binary() | [string()] | [binary()], string() | binary(), list()) -> {ok, pid()} | {error, any()}.
+send(From, To, Subject, Options) ->
+  BFrom = eutils:to_binary(From),
+  BSubject = eutils:to_binary(Subject),
+  Dest = [{<<"To">>, to_list_of_binary(To)}] ++
+         case lists:keyfind(cc, 1, Options) of
+    {cc, Data0} -> [{<<"Cc">>, to_list_of_binary(Data0)}];
+    _ -> []
+  end ++ case lists:keyfind(bcc, 1, Options) of
+    {bcc, Data1} -> [{<<"Bcc">>, to_list_of_binary(Data1)}];
+    _ -> []
+  end,
+  Attachments = case lists:keyfind(attachments, 1, Options) of
+    {attachments, Data2} -> to_list_of_binary(Data2);
+    false -> []
+  end,
+  Body = case lists:keyfind(template, 1, Options) of
+    {template, Template, TemplateData} -> 
+      HtmlTemplate = list_to_atom(atom_to_list(Template) ++ "_html"),
+      TextTemplate = list_to_atom(atom_to_list(Template) ++ "_txt"),
+      case eutils:module_exist(HtmlTemplate) of
+        false -> [];
+        true -> 
+          {ok, Html} = HtmlTemplate:render(TemplateData), 
+          [{html, ebinary:concat(Html)}]
+      end ++ case eutils:module_exist(TextTemplate) of
+        false -> [];
+        true -> 
+          {ok, Text} = TextTemplate:render(TemplateData), 
+          [{html, ebinary:concat(Text)}]
+      end;
+    _ -> case lists:keyfind(body, 1, Options) of
+        {body, Data3} -> [{text, eutils:to_binary(Data3)}];
+        _ -> [{text, <<"">>}]
+      end
+    end,
+  Callback = elists:keyfind(callback, 1, Options, undefined),
+  do_send(BFrom, Dest, BSubject, Body, Attachments, Callback).
+
+to_list_of_binary(Data) ->
+  case eutils:is_string(Data) of
+    true -> [list_to_binary(Data)];
+    false -> case is_binary(Data) of
+        true -> [Data];
+        false -> lists:map(fun eutils:to_binary/1, Data)
+      end
+  end.
+
+% do_send(
 %   <<"gregoire.lejeune@gmail.com">>,
 %   [{<<"To">, <<"gregoire.lejeune@free.fr">>},
 %    {<<"Cc">, [<<"gregoire.lejeune@gmail.com">>, <<"lejeune.gregoire@me.com">>]}],
 %   <<"Test gen_smtp">>,
 %   [{text, <<"Contenu au format text">>},
 %    {html, <<"Contenu au format <b>html</b>">>}],
-%   [<<"/Users/glejeune/Dropbox/Greg/images/greg.jpg">>]).
-send(From, Dest, Subject, Bodies, Attachments) ->
+%   [<<"/Users/glejeune/Dropbox/Greg/images/greg.jpg">>],
+%   Callback).
+do_send(From, Dest, Subject, Bodies, Attachments, Callback) ->
   Headers = [
       {<<"From">>, From}, 
       {<<"Subject">>, Subject},
@@ -21,7 +96,10 @@ send(From, Dest, Subject, Bodies, Attachments) ->
   HasAttachement = length(Attachments) > 0,
   MultipartBody = length(Bodies) > 1,
   Mail = mimemail:encode(gen_mail(HasAttachement, MultipartBody, Headers, Bodies, Attachments)),
-  {binary_to_list(From), dests_list(Dest), Mail}.
+  gen_smtp_client:send(
+    {binary_to_list(From), dests_list(Dest), Mail},
+    paris:mailconf(),
+    Callback).
   
 dests_list(Dests) ->
   lists:foldl(fun({_, Dest}, Acc) ->
@@ -143,38 +221,3 @@ mimetype(File) ->
           end
       end, <<>>, Rest)}.
 
-test1() ->
-  {From, To, Mail} = MM = send(
-      <<"gregoire.lejeune@gmail.com">>,
-      [{<<"To">>, <<"gregoire.lejeune@free.fr">>},
-       {<<"Cc">>, [<<"gregoire.lejeune@gmail.com">>, <<"lejeune.gregoire@me.com">>]}],
-      <<"Test gen_smtp">>,
-      [{text, <<"Contenu au format text">>},
-       {html, <<"Contenu au format <b>html</b>">>}],
-      [<<"/Users/glejeune/Dropbox/Greg/images/greg.jpg">>]),
-  io:format("FROM : ~p~n", [From]),
-  io:format("TO   : ~p~n", [To]),
-  file:write_file("test.mel", Mail),
-  io:format("~s~n", [Mail]),
-  gen_smtp_client:send_blocking(MM, [
-      {relay, "localhost"},
-      {port, 1025}
-      ]).
-     
-test2() ->
-  {From, To, Mail} = MM = send(
-      <<"Greg <gregoire.lejeune@gmail.com>">>,
-      [{<<"To">>, <<"gregoire.lejeune@free.fr">>},
-       {<<"Cc">>, [<<"gregoire.lejeune@gmail.com">>, <<"lejeune.gregoire@me.com">>]}],
-      <<"Test gen_smtp">>,
-      [{text, <<"Contenu au format text">>},
-       {html, <<"Contenu au format <b>html</b>">>}],
-      []),
-  io:format("FROM : ~p~n", [From]),
-  io:format("TO   : ~p~n", [To]),
-  file:write_file("test.mel", Mail),
-  io:format("~s~n", [Mail]),
-  gen_smtp_client:send_blocking(MM, [
-      {port, 1025},
-      {relay, "localhost"}
-      ]).
