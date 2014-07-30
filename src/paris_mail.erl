@@ -1,6 +1,22 @@
 -module(paris_mail).
 
--export([send/4]).
+-export([
+  send/4,
+  deliver/3,
+  deliver/4
+  ]).
+
+deliver(Module, To, Data) ->
+  deliver(Module, To, Data, []).
+deliver(Module, To, Data, Options) ->
+  send(
+    Module:from(),
+    To,
+    elists:keyfind(subject, 1, Options, Module:subject()),
+    [{template, Module:template(), Data},
+     {cc, elists:keyfind(cc, 1, Options, []) ++ Module:cc()},
+     {bcc, elists:keyfind(bcc, 1, Options, []) ++ Module:bcc()},
+     {callback, fun Module:done/1}]).
 
 %% @doc
 %% Send an email
