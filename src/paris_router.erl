@@ -51,24 +51,28 @@ handle(Req, State) ->
   Action = list_to_atom(string:to_lower(binary_to_list(Method))),
   {Path, Module, Args} = get_module(Req, State),
   lager:info("~s ~s (~p :: ~p)", [Method, Path, Module, Args]),
-  {Code, Header, Body} = case code:ensure_loaded(Module) of
-    {module, Module} ->
-      case erlang:function_exported(Module, Action, 1+length(Args)) of
-        true -> 
-          erlang:apply(Module, Action, [Req] ++ Args);
-        false -> 
-          case erlang:function_exported(Module, all, 1+length(Args)) of
-            true -> 
-              erlang:apply(Module, all, [Req] ++ Args);
-            false ->
-              {404, [], []}
-          end
-      end;
-    _ ->
-      case paris_plugin:call(controller, Module, Action, [Req] ++ Args) of
-        undef -> static(Path);
-        R -> R
-      end
+  {Code, Header, Body} = try
+    case code:ensure_loaded(Module) of
+      {module, Module} ->
+        case erlang:function_exported(Module, Action, 1+length(Args)) of
+          true -> 
+            erlang:apply(Module, Action, [Req] ++ Args);
+          false -> 
+            case erlang:function_exported(Module, all, 1+length(Args)) of
+              true -> 
+                erlang:apply(Module, all, [Req] ++ Args);
+              false ->
+                {404, [], []}
+            end
+        end;
+      _ ->
+        case paris_plugin:call(controller, Module, Action, [Req] ++ Args) of
+          undef -> static(Path);
+          R -> R
+        end
+    end
+  catch 
+    _:_ -> {500, [], "error 5000"}
   end,
   {ok, Req4} = case Code of
     stream -> 
@@ -136,16 +140,18 @@ get_module(Req, State) ->
 
 error_body(Code, Action, Path, Module) ->
   ErrorTmpl = list_to_atom("error_" ++ integer_to_list(Code) ++ "_html"),
-  case code:ensure_loaded(ErrorTmpl) of
-    {module, ErrorTmpl} ->
-      case ErrorTmpl:render([
-            {action, atom_to_list(Action)},
-            {path, binary_to_list(Path)},
-            {controller, atom_to_list(Module)}
-          ]) of
-        {ok, IOList} -> IOList;
-        _ -> []
-      end;
+  Template = case code:ensure_loaded(ErrorTmpl) of
+    {module, ErrorTmpl} -> ErrorTmpl;
+    _ -> paris_error_view_dtl
+  end,
+  case Template:render([
+        {code, Code},
+        {action, atom_to_list(Action)},
+        {path, binary_to_list(Path)},
+        {controller, atom_to_list(Module)},
+        {stacktrace, io_lib:format("~p", [erlang:get_stacktrace()])}
+        ]) of
+    {ok, IOList} -> IOList;
     _ -> []
   end.
 

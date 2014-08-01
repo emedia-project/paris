@@ -73,7 +73,7 @@ send(From, To, Subject, Options) ->
         false -> [];
         true -> 
           {ok, Text} = TextTemplate:render(TemplateData), 
-          [{html, ebinary:concat(Text)}]
+          [{text, ebinary:concat(Text)}]
       end;
     _ -> case lists:keyfind(body, 1, Options) of
         {body, Data3} -> [{text, eutils:to_binary(Data3)}];

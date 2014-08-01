@@ -44,7 +44,18 @@ start(_StartType, [AppName]) ->
   Mode = list_to_atom("paris_" ++ os:getenv("PARIS_RUN_MODE")),
   Mode:start(),
   lager:info("~p server started on port ~p", [AppName, Port]),
-  paris_sup:start_link([{app, AppName}, {port, Port}, {ip, IP}, {max_conn, MaxConn}]).
+  case paris_sup:start_link([{app, AppName}, {port, Port}, {ip, IP}, {max_conn, MaxConn}]) of
+    {ok, PPID} ->
+      _ = case application:get_env(AppName, applications) of
+        {ok, Apps} when is_list(Apps) -> 
+          lists:foreach(fun(App) ->
+                ok = application:start(App)
+            end, Apps);
+        _ -> ok
+      end,
+      {ok, PPID};
+    E -> E
+  end.
 
 stop(_State) ->
   ok.

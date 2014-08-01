@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Lucida Grande", "Bitstream Vera Sans", "Verdana";
+      }
+      h1 {
+        margin: 0;
+        padding: 10px;
+        background-color: red;
+        color: #fff;
+      }
+      .body {
+        margin: 10px;
+      }
+      pre {
+        background-color: #BBB;
+        font-size: 14px;
+        border: 1px solid #999;
+        margin: 10px;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Erreur {{ code }} - {{ path }}</h1>
+    <div class="body">
+      <p>
+      <b>Controller</b> : {{ controller }} - <b>Action</b> : {{ action }}
+      </p>
+      <h2>Stacktrace</h2>
+      <p>
+        <pre><code> {{stacktrace }} </code></pre>
+      </p>
+    </div>
+  </body>
+</html>
