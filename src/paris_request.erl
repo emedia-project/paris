@@ -10,8 +10,18 @@
   param/3,
   param/2,
   params/2,
-  params/1
+  params/1,
+  header/2,
+  headers/1
 ]).
+
+header(Req, Name) ->
+  {Value, _} = cowboy_req:header(Name, Req),
+  Value.
+
+headers(Req) ->
+  {Headers, _} = cowboy_req:headers(Req),
+  Headers.
 
 param(Req, Type, Name) ->
   case lists:keyfind(Name, 1, params(Req, Type)) of
