@@ -1,0 +1,14 @@
+{application, ssl_sample, [
+  {description, ""},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+    kernel,
+    stdlib,
+    crypto,
+    lager,
+    cowboy
+  ]},
+  {mod, { paris_app, [ssl_sample]}},
+  {env, []}
+]}.

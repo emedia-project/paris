@@ -40,7 +40,7 @@ routes(App) ->
 % REST
 % -------------------------------------
 
-init({tcp, http}, Req, Opts) ->
+init(_, Req, Opts) ->
   case cowboy_req:header(<<"upgrade">>, Req) of
     {<<"websocket">>, _Req2} -> {upgrade, protocol, cowboy_websocket};
     {_, Req3} -> {ok, Req3, Opts}
