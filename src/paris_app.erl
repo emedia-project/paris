@@ -61,11 +61,13 @@ start(_StartType, [AppName]) ->
   lager:info("~p server started on port ~p (ssl: ~p)", [AppName, Port, SSL]),
   case paris_sup:start_link([{app, AppName}, {port, Port}, {ip, IP}, {max_conn, MaxConn}]) of
     {ok, PPID} ->
-      _ = case application:get_env(AppName, applications) of
+      _ = case application:get_env(AppName, start) of
         {ok, Apps} when is_list(Apps) -> 
-          lists:foreach(fun(App) ->
-                ok = application:start(App)
-            end, Apps);
+              lists:foreach(fun({application, App}) ->
+                                ok = application:start(App);
+                               ({module, Mod, Args}) ->
+                                erlang:apply(Mod, start, Args)
+                            end, Apps);
         _ -> ok
       end,
       {ok, PPID};
