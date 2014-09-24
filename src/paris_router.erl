@@ -54,16 +54,20 @@ handle(Req, State) ->
   {Code, Header, Body} = try
     case code:ensure_loaded(Module) of
       {module, Module} ->
-        case erlang:function_exported(Module, Action, 1+length(Args)) of
-          true -> 
-            erlang:apply(Module, Action, [Req] ++ Args);
-          false -> 
-            case erlang:function_exported(Module, all, 1+length(Args)) of
+        case before_actions(Module, Req) of
+          continue ->
+            case erlang:function_exported(Module, Action, 1+length(Args)) of
               true -> 
-                erlang:apply(Module, all, [Req] ++ Args);
-              false ->
-                {404, [], []}
-            end
+                erlang:apply(Module, Action, [Req] ++ Args);
+              false -> 
+                case erlang:function_exported(Module, all, 1+length(Args)) of
+                  true -> 
+                    erlang:apply(Module, all, [Req] ++ Args);
+                  false ->
+                    {404, [], []}
+                end
+            end;
+          R -> R
         end;
       _ ->
         case paris_plugin:call(controller, Module, Action, [Req] ++ Args) of
@@ -175,4 +179,13 @@ static(Path) ->
             {ok, Data} -> {200, [{<<"Content-Type">>, paris_utils:mime(Static)}], Data}
           end
       end
+  end.
+
+before_actions(Module, Req) ->
+  case erlang:function_exported(Module, before, 1) of
+    true -> case erlang:apply(Module, before, [Req]) of 
+              continue -> continue;
+              {_, _, _} = R -> R
+            end;
+    false -> continue
   end.
