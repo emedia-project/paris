@@ -34,12 +34,11 @@
   render_stream/4
 ]).
 
-%% 
-%% render(html, [
-%%   {template: my_template},
+%% render(Type, [
+%%   {template, my_template},
 %%   {data, []},
 %%   {headers, [...]},
-%%   {status: 200}]).
+%%   {status, 200}]).
 render(stream, Options) ->
   case elists:keyfind(path, 1, Options, false) of
     false -> {500, [], []};

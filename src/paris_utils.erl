@@ -1,7 +1,8 @@
 -module(paris_utils).
 
 -export([
-  mime/1
+  mime/1,
+  to_qs/1
 ]).
 
 mime(File) ->
@@ -10,3 +11,12 @@ mime(File) ->
     [M|_] -> M;
     T -> T
   end.
+
+to_qs(Params) when is_list(Params) ->
+  to_qs(Params, "").
+to_qs([], Qs) -> lists:flatten(Qs);
+to_qs([{Param, Value}|Rest], "") -> 
+  to_qs(Rest, "?" ++ eutils:to_list(Param) ++ "=" ++ eutils:to_list(Value));
+to_qs([{Param, Value}|Rest], Qs) -> 
+  to_qs(Rest, Qs ++ "&" ++ eutils:to_list(Param) ++ "=" ++ eutils:to_list(Value)).
+

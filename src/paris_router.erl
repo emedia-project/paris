@@ -22,13 +22,18 @@
 routes(App) ->
   CustomRoutes = case application:get_env(App, routes) of
     {ok, Routes} -> 
-      lists:map(fun({Path, Module}) ->
+      lists:map(
+        fun
+          ({Path, {redirect, Uri, Params}}) ->
+            {Path, paris_redirect, [Uri, Params]};
+          ({Path, Module}) ->
             [T|_] = lists:reverse(Path),
             if 
               T =:= $/ -> {Path ++ "[...]", ?MODULE, [Module]};
               true -> {Path ++ "/[...]", ?MODULE, [Module]}
             end
-        end, lists:reverse(lists:sort(Routes)));
+        end,
+        lists:reverse(lists:sort(Routes)));
     _ -> 
       []
   end,
