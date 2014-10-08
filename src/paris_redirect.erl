@@ -8,7 +8,16 @@ init({tcp, http}, Request, _Opts) ->
 handle(Request, State) ->
   [DestRoute, Params] = State,
   Params2 = paris_request:params(Request, get),
-  FinalRoute = DestRoute ++ paris_utils:to_qs(Params2 ++ Params),
+  Funs = [
+          {1, fun eutils:to_list/1},
+          {2, fun eutils:to_list/1}
+         ],
+  FinalRoute = DestRoute ++ paris_utils:to_qs(
+                              elists:merge_keylists(
+                                1, 
+                                elists:keylistmap(Funs, Params),
+                                elists:keylistmap(Funs, Params2)
+                               )),
   {ok, R} = cowboy_req:reply(302, [{<<"Location">>, list_to_binary(FinalRoute)}], [], Request),
   {ok, R, State}.
 
