@@ -5,6 +5,7 @@ OPTS=$*
 RUNNER_SCRIPT_DIR=$(cd ${0%/*} && pwd)
 NAME=`basename $0`
 PIDFILE=$RUNNER_SCRIPT_DIR"/."$NAME".pid"
+BASEDIR=`dirname $0`
 
 STARTED=false
 PID=""
@@ -28,7 +29,7 @@ help() {
   if [ "x$MESSAGE" != "x" ] ; then
     echo $MESSAGE
   fi
-  echo "Usage : start.sh [options] {start|stop|console|status}" 
+  echo "Usage : ws_chat [options] {start|stop|console|status}" 
   echo ""
   echo "Options :"
   echo "  -d --development : Run in development mode"
@@ -51,7 +52,12 @@ start_app() {
   if [ $STARTED = true ] ; then
      echo "$NAME is already running (PID $PID)"
    else
-     erl +pc unicode -pa $PWD/ebin $PWD/apps/*/ebin $PWD/deps/*/ebin $NOSHELL -config $PWD/config/$NAME.config -s $NAME
+     EXTRA_ARGS=""
+     if [ -f $BASEDIR/config/vm.args ] ; then
+       EXTRA=$(cat $BASEDIR/config/vm.args | grep -v "^\s*#" | sed -e 's/#.*//' | xargs)
+       EXTRA_ARGS=$(eval echo $EXTRA)
+     fi
+     erl $EXTRA_ARGS -pa $BASEDIR/ebin $BASEDIR/apps/*/ebin $BASEDIR/deps/*/ebin $NOSHELL -config $BASEDIR/config/$NAME.config -s $NAME
    fi
 }
 
@@ -71,7 +77,7 @@ stop_app() {
   fi
 }
 
-while (( "$#" )); do
+while [ $# -ne 0 ] ; do
   case $1 in
     console) 
       NOSHELL="" ; DAEMON=false ; ACTION="console" ;;

@@ -52,7 +52,7 @@ init(Req, Opts) ->
   end.
 
 handle(Req, State) ->
-  {Method, _} = cowboy_req:method(Req),
+  Method = cowboy_req:method(Req),
   Action = list_to_atom(string:to_lower(binary_to_list(Method))),
   {Path, Module, Args} = get_module(Req, State),
   lager:info("~s ~s (~p :: ~p)", [Method, Path, Module, Args]),
@@ -129,7 +129,7 @@ websocket_terminate(Reason, Req, State) ->
 % -------------------------------------
 
 get_module(Req, State) ->
-  {Path, _} = cowboy_req:path(Req),
+  Path = cowboy_req:path(Req),
   {Module, Args} = case State of
     [M] -> 
       Args1 = case cowboy_req:path_info(Req) of
