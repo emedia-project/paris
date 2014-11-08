@@ -4,7 +4,7 @@
   routes/1
 ]).
 -export([
-  init/3, 
+  init/2, 
   handle/2, 
   terminate/3
 ]).
@@ -45,10 +45,10 @@ routes(App) ->
 % REST
 % -------------------------------------
 
-init(_, Req, Opts) ->
+init(Req, Opts) ->
   case cowboy_req:header(<<"upgrade">>, Req) of
-    {<<"websocket">>, _Req2} -> {upgrade, protocol, cowboy_websocket};
-    {_, Req3} -> {ok, Req3, Opts}
+    {<<"websocket">>, _Req2} -> {cowboy_websocket, Req, Opts};
+    _ -> handle(Req, Opts)
   end.
 
 handle(Req, State) ->
