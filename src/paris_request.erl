@@ -50,8 +50,7 @@ post_vals(Req) ->
     _ -> []
   end.
 get_vals(Req) ->
-  {Params2, _} = cowboy_req:qs_vals(Req),
-  Params2.
+  cowboy_req:parse_qs(Req).
 
 body(Req) ->
   case cowboy_req:body(Req) of
