@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>redirect</title>
+  </head>
+  <body>
+    Available routes:
+
+    <ul>
+      <li><a href="/index/code">/index/code</a> (redirect)</li>
+      <li><a href="/index/code?type=override">/index/code?type=override</a> (redirect override)</li>
+      <li><a href="/index/code?add=other">/index/code?add=other</a> (redirect add)</li>
+    </ul>
+
+    Params : 
+
+    <ul>
+      {% if type %}
+      <li>type = {{type}}</li>
+      {% endif %}
+      {% if add %}
+      <li>add = {{add}}</li>
+      {% endif %}
+    </ul>
+  </body>
+</html>

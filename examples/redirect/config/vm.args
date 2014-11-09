@@ -1,0 +1,9 @@
+# Add here all your estra args
+# unlike the classique Erlang vm.args, you can use env vars 
+# Example :
+#   -pa $BASEDIR/deps/extra/*/ebin
+# If you use a -args_file here, it will be treated has a standrad 
+# args file (without env var support)
+
+# Unicode support
++pc unicode

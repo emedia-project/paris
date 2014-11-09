@@ -4,8 +4,7 @@
   routes/1
 ]).
 -export([
-  init/2, 
-  handle/2 %, 
+  init/2 %, 
   % terminate/3
 ]).
 -export([

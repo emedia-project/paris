@@ -1,0 +1,10 @@
+.DS_Store
+deps
+ebin
+log
+*.beam
+*.mnesia
+*.txt*
+erl_crash.dump
+.eunit
+doc
