@@ -89,7 +89,7 @@ handle(Req, State) ->
       cowboy_req:reply(200, Header, Req2);
     N when is_number(N) ->
       if
-        Code > 400 -> cowboy_req:reply(Code, Header, error_body(Code, Action, Path, Module), Req);
+        Code >= 400 -> cowboy_req:reply(Code, Header, error_body(Code, Action, Path, Module), Req);
         true -> cowboy_req:reply(Code, Header, Body, Req)
       end
   end,
