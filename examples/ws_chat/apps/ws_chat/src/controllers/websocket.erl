@@ -5,8 +5,7 @@
 -export([
   init/3,
   handle/3,
-  info/3,
-  terminate/3
+  info/3
 ]).
 
 init(_TransportName, Req, State) ->
@@ -22,5 +21,3 @@ handle(_, Req, State) ->
 info(Msg, Req, State) ->
   paris_response:ws_text(Req, State, Msg).
 
-terminate(_, _, _) ->
-  paris_response:ws_terminate().

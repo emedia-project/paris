@@ -9,8 +9,9 @@ handle(Request, State) ->
   [DestRoute, Params] = State,
   Params2 = paris_request:params(Request, get),
   FinalRoute = DestRoute ++ paris_utils:to_qs(Params2 ++ Params),
-  {ok, R} = cowboy_req:reply(302, [{<<"Location">>, list_to_binary(FinalRoute)}], [], Request),
-  {ok, R, State}.
+  {ok, 
+   cowboy_req:reply(302, [{<<"Location">>, list_to_binary(FinalRoute)}], [], Request), 
+   State}.
 
 terminate(_Req, _State, _) ->
   ok.

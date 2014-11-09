@@ -12,16 +12,18 @@
   params/2,
   params/1,
   header/2,
-  headers/1
+  headers/1,
+  method/1
 ]).
 
+method(Req) ->
+  cowboy_req:method(Req).
+
 header(Req, Name) ->
-  {Value, _} = cowboy_req:header(Name, Req),
-  Value.
+  cowboy_req:header(Name, Req).
 
 headers(Req) ->
-  {Headers, _} = cowboy_req:headers(Req),
-  Headers.
+  cowboy_req:headers(Req).
 
 param(Req, Type, Name) ->
   case lists:keyfind(Name, 1, params(Req, Type)) of
@@ -59,10 +61,7 @@ body(Req) ->
   end.
 
 content_type(Req) ->
-  case cowboy_req:parse_header(<<"content-type">>, Req) of
-    {ok, ParsedValue, _} -> ParsedValue;
-    _ -> undefined
-  end.
+  cowboy_req:parse_header(<<"content-type">>, Req, undefined).
 
 content_type(Req, ContentType) ->
   [Type, SubType | _] = binary:split(ContentType, <<"/">>),
@@ -74,10 +73,7 @@ content_type(Req, ContentType) ->
   end.
 
 accept(Req) ->
-  case cowboy_req:parse_header(<<"accept">>, Req) of
-    {ok, ParsedValue, _} -> ParsedValue;
-    _ -> []
-  end.
+  cowboy_req:parse_header(<<"accept">>, Req, []).
 
 accept(Req, Accept) ->
   [Type, SubType | _] = binary:split(Accept, <<"/">>),
@@ -87,7 +83,7 @@ accept(Req, Accept) ->
     end, accept(Req)).
 
 range(Req) ->
-  {Range, _} = cowboy_req:header(<<"range">>, Req, <<"bytes=0-">>),
+  Range = cowboy_req:header(<<"range">>, Req, <<"bytes=0-">>),
   [_, Range1|_] = string:tokens(binary_to_list(Range), "="),
   list_to_tuple([trunc(list_to_integer(X)/1024) || 
       X <- string:tokens(Range1, "-")]).

@@ -5,14 +5,12 @@
 ]).
 -export([
   init/2, 
-  handle/2, 
-  terminate/3
+  handle/2 %, 
+  % terminate/3
 ]).
 -export([
-  websocket_init/3,
   websocket_handle/3,
-  websocket_info/3,
-  websocket_terminate/3
+  websocket_info/3
 ]).
 
 % -------------------------------------
@@ -46,13 +44,15 @@ routes(App) ->
 % -------------------------------------
 
 init(Req, Opts) ->
-  case cowboy_req:header(<<"upgrade">>, Req) of
-    {<<"websocket">>, _Req2} -> {cowboy_websocket, Req, Opts};
+  case paris_request:header(Req, <<"upgrade">>) of
+    <<"websocket">> -> 
+      {ok, Req2, Opts2} = websocket_init({}, Req, Opts),
+      {cowboy_websocket, Req2, Opts2};
     _ -> handle(Req, Opts)
   end.
 
 handle(Req, State) ->
-  Method = cowboy_req:method(Req),
+  Method = paris_request:method(Req),
   Action = list_to_atom(string:to_lower(binary_to_list(Method))),
   {Path, Module, Args} = get_module(Req, State),
   lager:info("~s ~s (~p :: ~p)", [Method, Path, Module, Args]),
@@ -83,7 +83,7 @@ handle(Req, State) ->
   catch 
     _:_ -> {500, [], "error 5000"}
   end,
-  {ok, Req4} = case Code of
+  Req4 = case Code of
     stream -> 
       {Size, SendFile} = Body,
       Req2 = cowboy_req:set_resp_body_fun(Size, SendFile, Req),
@@ -97,8 +97,8 @@ handle(Req, State) ->
   {ok, Req4, State}.
 
 
-terminate(_Req, _State, _) ->
-  ok.
+% terminate(_Req, _State, _) ->
+%   ok.
 
 % -------------------------------------
 % Websocket
@@ -119,11 +119,6 @@ websocket_info(Info, Req, State) ->
   lager:debug("WS::info ~s", [Path]),
   erlang:apply(Module, info, [Info, Req, State]).
 
-websocket_terminate(Reason, Req, State) ->
-  {Path, Module, _Args} = get_module(Req, State),
-  lager:debug("WS::terminate ~s", [Path]),
-  erlang:apply(Module, terminate, [Reason, Req, State]).
-
 % -------------------------------------
 % Private
 % -------------------------------------
@@ -133,11 +128,11 @@ get_module(Req, State) ->
   {Module, Args} = case State of
     [M] -> 
       Args1 = case cowboy_req:path_info(Req) of
-        {PathInfo, _} when is_list(PathInfo) ->
-          [binary_to_list(E) || E <- PathInfo];
-        _ -> 
-          []
-      end,
+                undefined ->
+                  [];
+                PathInfo ->
+                  [binary_to_list(E) || E <- PathInfo]
+              end,
       {M, Args1};
     [] ->
       case string:tokens(binary_to_list(Path), "/") of
