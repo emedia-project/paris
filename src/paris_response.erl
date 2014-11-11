@@ -1,6 +1,8 @@
 -module(paris_response).
 
 -export([
+  cookie/4,
+  delete_cookie/2,
   render/2,
   redirect/1,
   redirect/2,
@@ -33,6 +35,16 @@
   render_stream/3,
   render_stream/4
 ]).
+
+cookie(Req, Name, Value, Opts) ->
+  paris_req:updt(
+    Req,
+    cowboy_req:set_resp_cookie(
+      Name, Value, Opts,
+      paris_req:req(Req))).
+
+delete_cookie(Req, Name) ->
+  cookie(Req, Name, <<"">>, [{max_age, 0}]).
 
 %% render(Type, [
 %%   {template, my_template},

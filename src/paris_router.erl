@@ -4,8 +4,7 @@
   routes/1
 ]).
 -export([
-  init/2 %, 
-  % terminate/3
+  init/2
 ]).
 -export([
   websocket_handle/3,
@@ -43,7 +42,7 @@ routes(App) ->
 % -------------------------------------
 
 init(Req, Opts) ->
-  case paris_request:header(Req, <<"upgrade">>) of
+  case cowboy_req:header(<<"upgrade">>, Req) of
     <<"websocket">> -> 
       {ok, Req2, Opts2} = websocket_init({}, Req, Opts),
       {cowboy_websocket, Req2, Opts2};
@@ -51,22 +50,23 @@ init(Req, Opts) ->
   end.
 
 handle(Req, State) ->
-  Method = paris_request:method(Req),
+  {ok, ParisReq} = paris_req:start_link(Req),
+  Method = paris_request:method(ParisReq),
   Action = list_to_atom(string:to_lower(binary_to_list(Method))),
-  {Path, Module, Args} = get_module(Req, State),
+  {Path, Module, Args} = get_module(ParisReq, State),
   lager:info("~s ~s (~p :: ~p)", [Method, Path, Module, Args]),
   {Code, Header, Body} = try
     case code:ensure_loaded(Module) of
       {module, Module} ->
-        case before_actions(Module, Req) of
+        case before_actions(Module, ParisReq) of
           continue ->
             case erlang:function_exported(Module, Action, 1+length(Args)) of
               true -> 
-                erlang:apply(Module, Action, [Req] ++ Args);
+                erlang:apply(Module, Action, [ParisReq] ++ Args);
               false -> 
                 case erlang:function_exported(Module, all, 1+length(Args)) of
                   true -> 
-                    erlang:apply(Module, all, [Req] ++ Args);
+                    erlang:apply(Module, all, [ParisReq] ++ Args);
                   false ->
                     {404, [], []}
                 end
@@ -74,7 +74,7 @@ handle(Req, State) ->
           R -> R
         end;
       _ ->
-        case paris_plugin:call(controller, Module, Action, [Req] ++ Args) of
+        case paris_plugin:call(controller, Module, Action, [ParisReq] ++ Args) of
           undef -> static(Path);
           R -> R
         end
@@ -85,19 +85,19 @@ handle(Req, State) ->
   Req4 = case Code of
     stream -> 
       {Size, SendFile} = Body,
-      Req2 = cowboy_req:set_resp_body_fun(Size, SendFile, Req),
+      Req2 = cowboy_req:set_resp_body_fun(Size, SendFile, paris_req:req(ParisReq)),
       cowboy_req:reply(200, Header, Req2);
     N when is_number(N) ->
       if
-        Code >= 400 -> cowboy_req:reply(Code, Header, error_body(Code, Action, Path, Module), Req);
-        true -> cowboy_req:reply(Code, Header, Body, Req)
+        Code >= 400 -> cowboy_req:reply(Code, Header, 
+                                        error_body(Code, Action, Path, Module), 
+                                        paris_req:req(ParisReq));
+        true -> cowboy_req:reply(Code, Header, Body, paris_req:req(ParisReq))
       end
   end,
+  paris_req:stop(ParisReq),
   {ok, Req4, State}.
 
-
-% terminate(_Req, _State, _) ->
-%   ok.
 
 % -------------------------------------
 % Websocket
@@ -122,7 +122,8 @@ websocket_info(Info, Req, State) ->
 % Private
 % -------------------------------------
 
-get_module(Req, State) ->
+get_module(ParisReq, State) ->
+  Req = paris_req:req(ParisReq),
   Path = cowboy_req:path(Req),
   {Module, Args} = case State of
     [M] -> 
