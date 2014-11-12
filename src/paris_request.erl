@@ -22,7 +22,7 @@ cookies(Req) ->
   cowboy_req:parse_cookies(paris_req:req(Req)).
 
 cookie(Req, Name) ->
-  elist:keyfind(Name, 1, cookies(Req), undefined).
+  elists:keyfind(Name, 1, cookies(Req), undefined).
 
 method(Req) ->
   cowboy_req:method(paris_req:req(Req)).
