@@ -65,6 +65,8 @@ start(_StartType, [AppName]) ->
         {ok, Apps} when is_list(Apps) -> 
               lists:foreach(fun({application, App}) ->
                                 ok = application:start(App);
+                               ({application, App, ensure}) ->
+                                {ok, _} = application:ensure_all_started(App);
                                ({module, Mod, Args}) ->
                                 erlang:apply(Mod, start, Args)
                             end, Apps);
