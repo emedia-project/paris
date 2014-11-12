@@ -22,9 +22,7 @@ cookies(Req) ->
   cowboy_req:parse_cookies(paris_req:req(Req)).
 
 cookie(Req, Name) ->
-  Map = cowboy_req:match_cookies(
-          [eutils:to_atom(Name)], paris_req:req(Req)),
-  maps:get(eutils:to_atom(Name), Map, undefined).
+  elist:keyfind(Name, 1, cookies(Req), undefined).
 
 method(Req) ->
   cowboy_req:method(paris_req:req(Req)).
