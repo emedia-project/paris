@@ -1,7 +1,8 @@
 -module(paris_router).
 
 -export([
-  routes/1
+  routes/1,
+  path/1
 ]).
 -export([
   init/2
@@ -36,6 +37,14 @@ routes(App) ->
   [{'_', 
     CustomRoutes ++ [{'_', ?MODULE, []}]
   }].
+
+path(Module) ->
+  case application:get_env(paris:app(), routes) of
+    {ok, Routes} ->
+      elists:keyfind(Module, 2, Routes, <<"/?error=module">>);
+    _ ->
+      <<"/?error=route">>
+  end.
 
 % -------------------------------------
 % REST

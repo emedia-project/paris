@@ -140,6 +140,8 @@ redirect(Format, Data) when is_binary(Format), is_list(Data) ->
   redirect(binary_to_list(Format), Data);
 redirect(Format, Data) when is_list(Format), is_list(Data) ->
   redirect(io_lib:format(Format, Data)).
+redirect(Path) when is_atom(Path) ->
+  redirect(paris_router:path(Path));
 redirect(Path) when is_list(Path) ->
   redirect(list_to_binary(Path));
 redirect(Path) when is_binary(Path) ->
