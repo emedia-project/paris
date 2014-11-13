@@ -41,9 +41,23 @@ routes(App) ->
 path(Module) ->
   case application:get_env(paris:app(), routes) of
     {ok, Routes} ->
-      elists:keyfind(Module, 2, Routes, <<"/?error=module">>);
+      case elists:keyfind(Module, 2, Routes, <<>>) of
+        <<>> -> 
+          case erlang:function_exported(Module, get, 1) of
+            true -> 
+              "/" ++ eutils:to_list(Module);
+            false -> 
+              case erlang:function_exported(Module, all, 1) of
+                true ->
+                  "/" ++ eutils:to_list(Module);
+                false ->
+                  "/?error=module"
+              end
+          end;
+        Route -> Route
+      end;
     _ ->
-      <<"/?error=route">>
+      "/?error=route"
   end.
 
 % -------------------------------------
