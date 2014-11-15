@@ -80,7 +80,7 @@ handle(Req, State) ->
   {IP, _} = paris_request:peer(ParisReq),
   lager:info("~s - [~s] ~s ~s - ~p, ~p", 
              [enet:ip_to_str(IP), 
-              edate:today(),
+              edate:to_iso8601(edate:today()),
               Method, Path, Module, Args]),
   {Code, Header, Body} = try
     case code:ensure_loaded(Module) of
