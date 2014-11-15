@@ -77,7 +77,11 @@ handle(Req, State) ->
   Method = paris_request:method(ParisReq),
   Action = list_to_atom(string:to_lower(binary_to_list(Method))),
   {Path, Module, Args} = get_module(ParisReq, State),
-  lager:info("~s ~s (~p :: ~p)", [Method, Path, Module, Args]),
+  {IP, _} = paris_request:peer(ParisReq),
+  lager:info("~s - [~s] ~s ~s - ~p, ~p", 
+             [enet:ip_to_str(IP), 
+              edate:today(),
+              Method, Path, Module, Args]),
   {Code, Header, Body} = try
     case code:ensure_loaded(Module) of
       {module, Module} ->

@@ -1,6 +1,7 @@
 -module(paris_request).
 
 -export([
+  peer/1,
   body/1,
   content_type/1,
   content_type/2,
@@ -17,6 +18,9 @@
   cookies/1,
   cookie/2
 ]).
+
+peer(Req) ->
+  cowboy_req:peer(paris_req:req(Req)).
 
 cookies(Req) ->
   cowboy_req:parse_cookies(paris_req:req(Req)).
