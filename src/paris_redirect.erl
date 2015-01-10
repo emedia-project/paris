@@ -1,3 +1,4 @@
+% @hidden
 -module(paris_redirect).
 
 -export([init/2]).

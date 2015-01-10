@@ -1,3 +1,4 @@
+% @hidden
 -module(paris_plugin).
 
 -export([call/4]).

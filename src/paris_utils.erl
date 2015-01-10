@@ -1,3 +1,4 @@
+%% @hidden
 -module(paris_utils).
 
 -export([

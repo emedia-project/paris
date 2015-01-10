@@ -6,8 +6,12 @@
   deliver/4
   ]).
 
+%% @equiv deliver(Module, To, Data, [])
 deliver(Module, To, Data) ->
   deliver(Module, To, Data, []).
+
+%% @doc
+%% @end
 deliver(Module, To, Data, Options) ->
   send(
     Module:from(),
@@ -82,6 +86,8 @@ send(From, To, Subject, Options) ->
     end,
   Callback = elists:keyfind(callback, 1, Options, undefined),
   do_send(BFrom, Dest, BSubject, Body, Attachments, Callback).
+
+% private
 
 to_list_of_binary(Data) ->
   case eutils:is_string(Data) of

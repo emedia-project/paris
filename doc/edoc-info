@@ -1,0 +1,5 @@
+%% encoding: UTF-8
+{application,samsa}.
+{packages,[]}.
+{modules,[paris,paris_mail,paris_mailer,paris_request,paris_response,
+          paris_router,paris_sup,paris_test,paris_websocket]}.

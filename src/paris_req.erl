@@ -1,3 +1,4 @@
+% @hidden
 -module(paris_req).
 -behaviour(gen_server).
 -define(SERVER, ?MODULE).

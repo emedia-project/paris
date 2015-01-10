@@ -1,3 +1,6 @@
+%% @doc
+%% Routing
+%% @end
 -module(paris_router).
 
 -export([
@@ -16,6 +19,7 @@
 % Common
 % -------------------------------------
 
+%% @hidden
 routes(App) ->
   CustomRoutes = case application:get_env(App, routes) of
     {ok, Routes} -> 
@@ -38,6 +42,7 @@ routes(App) ->
     CustomRoutes ++ [{'_', ?MODULE, []}]
   }].
 
+%% @hidden
 path(Module) ->
   case application:get_env(paris:app(), routes) of
     {ok, Routes} ->
@@ -64,6 +69,7 @@ path(Module) ->
 % REST
 % -------------------------------------
 
+%% @hidden
 init(Req, Opts) ->
   case cowboy_req:header(<<"upgrade">>, Req) of
     <<"websocket">> -> 
@@ -72,6 +78,7 @@ init(Req, Opts) ->
     _ -> handle(Req, Opts)
   end.
 
+%% @hidden
 handle(Req, State) ->
   {ok, ParisReq} = paris_req:start_link(Req),
   Method = paris_request:method(ParisReq),
@@ -130,16 +137,19 @@ handle(Req, State) ->
 % Websocket
 % -------------------------------------
 
+%% @hidden
 websocket_init(TransportName, Req, Opts) ->
   {Path, Module, _Args} = get_module(Req, Opts),
   lager:debug("WS::init ~s", [Path]),
   erlang:apply(Module, init, [TransportName, Req, Opts]).
 
+%% @hidden
 websocket_handle(Msg, Req, State) ->
   {Path, Module, _Args} = get_module(Req, State),
   lager:debug("WS::handle ~s", [Path]),
   erlang:apply(Module, handle, [Msg, Req, State]).
 
+%% @hidden
 websocket_info(Info, Req, State) ->
   {Path, Module, _Args} = get_module(Req, State),
   lager:debug("WS::info ~s", [Path]),
