@@ -137,5 +137,5 @@ get_vals(Req) ->
   cowboy_req:parse_qs(paris_req:req(Req)).
 
 binding_vals(Req) ->
-  cowboy_req:binding(paris_req:req(Req)).
+  cowboy_req:bindings(paris_req:req(Req)).
 
