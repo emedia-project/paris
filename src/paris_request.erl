@@ -77,7 +77,7 @@ params(Req, Type) ->
 %% @doc
 %% @end
 params(Req) ->
-  get_vals(Req) ++ post_vals(Req) ++ binding_vals(Req).
+  merge_params_array(get_vals(Req) ++ post_vals(Req) ++ binding_vals(Req)).
 
 %% @doc
 %% @end
@@ -129,13 +129,35 @@ range(Req) ->
 
 post_vals(Req) ->
   case cowboy_req:body_qs(paris_req:req(Req)) of
-    {ok, List, _} -> List;
+    {ok, List, _} -> merge_params_array(List);
     _ -> []
   end.
 
 get_vals(Req) ->
-  cowboy_req:parse_qs(paris_req:req(Req)).
+  merge_params_array(cowboy_req:parse_qs(paris_req:req(Req))).
 
 binding_vals(Req) ->
-  cowboy_req:bindings(paris_req:req(Req)).
+  merge_params_array(cowboy_req:bindings(paris_req:req(Req))).
 
+merge_params_array(Params) ->
+  lists:foldl(fun({Key, Value}, Acc) ->
+                  RealKey = case re:run(Key, "([^\\[]*)\\[\\]$",[{capture,[1],list}]) of
+                              {match, [Key1]} -> Key1;
+                              nomatch -> Key
+                            end,
+                  Tuple = case lists:keyfind(RealKey, 1, Acc) of
+                            {RealKey, CurrentValue} when is_list(CurrentValue) ->
+                              {RealKey, lists:flatten([value_to_list(Value)|CurrentValue])};
+                            {RealKey, CurrentValue} ->
+                              {RealKey, lists:flatten([value_to_list(Value), CurrentValue])};
+                            _ ->
+                              {RealKey, value_to_list(Value)}
+                          end,
+                  [Tuple|Acc]
+              end, [], Params).
+
+value_to_list(Value) ->
+  case re:run(Value, "\\[([^\\]]*)]$",[{capture,[1],list}]) of
+    {match, [Value1]} -> [eutils:to_binary(X) || X <- string:tokens(eutils:to_string(Value1), ",")];
+    nomatch -> Value
+  end.
