@@ -145,15 +145,14 @@ merge_params_array(Params) ->
                               {match, [Key1]} -> Key1;
                               nomatch -> Key
                             end,
-                  Tuple = case lists:keyfind(RealKey, 1, Acc) of
-                            {RealKey, CurrentValue} when is_list(CurrentValue) ->
-                              {RealKey, lists:flatten([value_to_list(Value)|CurrentValue])};
-                            {RealKey, CurrentValue} ->
-                              {RealKey, lists:flatten([value_to_list(Value), CurrentValue])};
-                            _ ->
-                              {RealKey, value_to_list(Value)}
-                          end,
-                  [Tuple|Acc]
+                  case lists:keyfind(RealKey, 1, Acc) of
+                    {RealKey, CurrentValue} when is_list(CurrentValue) ->
+                      lists:keyreplace(RealKey, 1, Acc, {RealKey, lists:flatten([value_to_list(Value)|CurrentValue])});
+                    {RealKey, CurrentValue} ->
+                      lists:keyreplace(RealKey, 1, Acc, {RealKey, lists:flatten([value_to_list(Value), CurrentValue])});
+                    false ->
+                      [{RealKey, value_to_list(Value)}|Acc]
+                  end
               end, [], Params).
 
 value_to_list(Value) ->
