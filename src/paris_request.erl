@@ -12,6 +12,7 @@
   param/2,
   params/2,
   params/1,
+  param_to_string/1,
   header/2,
   headers/1,
   method/1,
@@ -78,6 +79,12 @@ params(Req, Type) ->
 %% @end
 params(Req) ->
   merge_params_array(get_vals(Req) ++ post_vals(Req) ++ binding_vals(Req)).
+
+%% @doc
+%% @end
+param_to_string(Value) when is_list(Value) ->
+  <<"[", (eutils:to_binary(string:join(lists:map(fun eutils:to_string/1, Value),",")))/binary, "]">>;
+param_to_string(Value) -> Value.
 
 %% @doc
 %% @end
