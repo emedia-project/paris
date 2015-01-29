@@ -16,7 +16,9 @@ mime(File) ->
   end.
 
 to_qs(Params) when is_list(Params) ->
-  to_qs(Params, <<"">>).
+  to_qs(Params, <<"">>);
+to_qs(Params) when is_map(Params) ->
+  to_qs(maps:to_list(Params), <<"">>).
 to_qs([], Qs) -> Qs;
 to_qs([{Param, Value}|Rest], <<"">>) -> 
   to_qs(Rest, <<"?", (urlencode(eutils:to_binary(Param)))/binary, "=", (urlencode(eutils:to_binary(Value)))/binary>>);
