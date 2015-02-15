@@ -114,7 +114,7 @@ handle(Req, State) ->
         end
     end
   catch 
-    _:_ -> {500, [], "error 5000"}
+    _:_ -> {500, [], []}
   end,
   Req4 = case Code of
     stream -> 
@@ -124,7 +124,7 @@ handle(Req, State) ->
     N when is_number(N) ->
       if
         Code >= 400 -> cowboy_req:reply(Code, Header, 
-                                        error_body(Code, Action, Path, Module), 
+                                        error_body(Body, Code, Action, Path, Module), 
                                         paris_req:req(ParisReq));
         true -> cowboy_req:reply(Code, Header, Body, paris_req:req(ParisReq))
       end
@@ -179,7 +179,7 @@ get_module(ParisReq, State) ->
   end,
   {Path, Module, Args}.
 
-error_body(Code, Action, Path, Module) ->
+error_body([], Code, Action, Path, Module) ->
   ErrorTmpl = list_to_atom("error_" ++ integer_to_list(Code) ++ "_html"),
   Template = case code:ensure_loaded(ErrorTmpl) of
     {module, ErrorTmpl} -> ErrorTmpl;
@@ -194,7 +194,9 @@ error_body(Code, Action, Path, Module) ->
         ]) of
     {ok, IOList} -> IOList;
     _ -> []
-  end.
+  end;
+error_body(Body, _, _, _, _) ->
+  Body.
 
 static(Path) ->
   Args = string:tokens(binary_to_list(Path), "/"),

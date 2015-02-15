@@ -8,6 +8,7 @@
   redirect/2,
   http_error/1,
   http_error/2,
+  http_error/3,
 
   ws_terminate/0,
   ws_ok/2,
@@ -139,6 +140,9 @@ http_error(Code) -> http_error(Code, []).
 %% @doc
 %% @end
 http_error(Code, Headers) -> {Code, Headers, []}.
+%% @doc
+%% @end
+http_error(Code, Headers, Body) -> {Code, Headers, Body}.
 
 % private
 
@@ -150,7 +154,7 @@ render(html, '-', Data, Headers, Status) when is_binary(Data) ->
     elists:merge_keylists(1, Headers, [{<<"Content-Type">>, <<"text/html">>}]),
     Status);
 render(xml, '-', Data, Headers, Status) when is_list(Data) ->
-  render(xml, '-', list_to_binary(Data), Headers, Status);
+  render(xml, '-', exml:export(Data), Headers, Status);
 render(xml, '-', Data, Headers, Status) when is_binary(Data) ->
   render(
     inline, '-', Data, 
