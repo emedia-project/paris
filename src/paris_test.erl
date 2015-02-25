@@ -3,6 +3,10 @@
 %% @end
 -module(paris_test).
 
+-export([
+         start/1
+        ]).
+
 % Helpers
 -export([
          request/3,
@@ -20,9 +24,9 @@
         ]).
 
 -define(HTTP_OPTIONS, [{timeout, infinity},
-                  {connect_timeout, infinity},
-                  {autoredirect, false},
-                  {version, "HTTP/1.1"}]).
+                       {connect_timeout, infinity},
+                       {autoredirect, false},
+                       {version, "HTTP/1.1"}]).
 -define(OPTIONS, [{sync, true},
                   {full_result, true}]).
 
@@ -33,6 +37,10 @@
 %%
 %% {timeout, timeout()} | {connect_timeout, timeout()} | {ssl, ssloptions()} | {essl, ssloptions()} | {autoredirect, boolean()} | {proxy_auth, {userstring(), passwordstring()}} | {version, http_version()} | {relaxed, boolean()} | {url_encode, boolean()}
 %% {sync, boolean()} | {stream, stream_to()} | {body_format, body_format()} | {full_result, boolean()} | {headers_as_is, boolean() | {socket_opts, socket_opts()} | {receiver, receiver()}, {ipv6_host_with_brackets, boolean()}}
+
+start(AppName) ->
+  os:putenv("PARIS_RUN_MODE", "production"),
+  AppName:start().
 
 request(Mode, Url, Fun) ->
   request(Mode, Url, [], "", [], Fun).
