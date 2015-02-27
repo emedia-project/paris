@@ -5,7 +5,7 @@
 
 -export([start/2, stop/1]).
 
-start(_StartType, [AppName]) ->
+start(_StartType, [AppName, StartTexas]) ->
   Port = case application:get_env(AppName, port) of
     {ok, P} -> P;
     _ ->
@@ -62,6 +62,14 @@ start(_StartType, [AppName]) ->
   lager:info("~p server started on port ~p (ssl: ~p)", [AppName, Port, SSL]),
   case paris_sup:start_link([{app, AppName}, {port, Port}, {ip, IP}, {max_conn, MaxConn}]) of
     {ok, PPID} ->
+      _ = case StartTexas of
+            true ->
+              lager:info("Database started."),
+              {ok, Conn} = texas:start(),
+              ok = paris:set(db, Conn);
+            false ->
+              ok
+          end,
       _ = case application:get_env(AppName, start) of
         {ok, Apps} when is_list(Apps) -> 
               lists:foreach(fun({application, App}) ->
