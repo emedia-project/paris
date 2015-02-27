@@ -56,7 +56,7 @@ start(_StartType, [AppName, StartTexas]) ->
     true ->
       {ok, _} = cowboy:start_http(https, MaxConn, TransOpts, ProtoOpts)
   end,
-  RunEnv = case os:get_env("PARIS_RUN_MODE") of
+  RunEnv = case os:getenv("PARIS_RUN_MODE") of
              false -> "production";
              Value -> Value
            end,
