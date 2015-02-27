@@ -56,8 +56,12 @@ start(_StartType, [AppName, StartTexas]) ->
     true ->
       {ok, _} = cowboy:start_http(https, MaxConn, TransOpts, ProtoOpts)
   end,
-  lager:info("Run mode : ~s", [os:getenv("PARIS_RUN_MODE")]),
-  Mode = list_to_atom("paris_" ++ os:getenv("PARIS_RUN_MODE")),
+  RunEnv = case os:get_env("PARIS_RUN_MODE") of
+             false -> "production";
+             Value -> Value
+           end,
+  lager:info("Run mode : ~s", [RunEnv]),
+  Mode = list_to_atom("paris_" ++ RunEnv),
   Mode:start(),
   lager:info("~p server started on port ~p (ssl: ~p)", [AppName, Port, SSL]),
   case paris_sup:start_link([{app, AppName}, {port, Port}, {ip, IP}, {max_conn, MaxConn}]) of
