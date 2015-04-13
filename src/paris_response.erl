@@ -198,7 +198,7 @@ render(json, Template, Data, Headers, Status) ->
 render(inline, Template, Data, Headers, Status) ->
   case code:ensure_loaded(Template) of
     {module, Template} ->
-      case Template:render(Data) of
+      case Template:render(Data, [{translation_fun, fun paris_i18n:trans/1}]) of  
         {ok, IOList} -> {Status, Headers, IOList};
         _ -> {500, [], []}
       end;

@@ -17,13 +17,17 @@
 %% ===================================================================
 
 start_link(Args) ->
-  supervisor:start_link({local, ?MODULE}, ?MODULE, [Args]).
+  supervisor:start_link({local, ?MODULE}, ?MODULE, Args).
 
 %% ===================================================================
 %% Supervisor callbacks
 %% ===================================================================
 
 init(Args) ->
+  AppName = elists:keyfind(app, 1, Args),
+  GetTextDir = code:priv_dir(AppName),
+  DefaultLang = application:get_env(AppName, i18n, "en"),
   {ok, {{one_for_one, 5, 10}, [
-        ?CHILD(paris, worker, Args)
+        ?CHILD(paris, worker, [Args]),
+        ?CHILD(paris_i18n, worker, [[{gettext_dir, GetTextDir}, {default_lang, DefaultLang}]])
       ]}}.
