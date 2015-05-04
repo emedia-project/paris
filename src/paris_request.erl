@@ -148,7 +148,7 @@ binding_vals(Req) ->
 
 merge_params_array(Params) ->
   lists:foldl(fun({Key, Value}, Acc) ->
-                  RealKey = case re:run(Key, "([^\\[]*)\\[\\]$",[{capture,[1],list}]) of
+                  RealKey = case re:run(Key, "([^\\[]*)\\[[^\\]]*\\]$",[{capture,[1],list}]) of
                               {match, [Key1]} -> eutils:to_binary(Key1);
                               nomatch -> Key
                             end,
